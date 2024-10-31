@@ -1,0 +1,129 @@
+<!-- symbol_system/templates/symbol_system/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Admin Panel</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://kit.fontawesome.com/47101d2035.js" crossorigin="anonymous"></script>
+
+    <!-- Load static files -->
+    {% load static %}
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            display: flex;
+            width: 800px;
+            height: 330px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .login-image {
+            width: 50%;
+            background-color: #184474;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-image img {
+            max-width: 100%;
+            height: 100;
+        }
+
+        .login-form {
+            width: 60%;
+            padding: 50px;
+        }
+
+        .login-form h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #184474;
+        }
+
+        .login-form .input-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form .input-group-prepend .input-group-text {
+            background-color: #184474;
+            color: white;
+        }
+
+        .login-form .btn {
+            background-color: #184474;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            border-radius: 50px;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-form .btn:hover {
+            background-color: #145a88;
+        }
+
+        .login-form .forgot-password {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #184474;
+        }
+
+        .login-form .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div class="login-container">
+        <!-- Left side with company image -->
+        <div class="login-image">
+            <img src="{% static 'images/designer.jpg' %}" alt="Company Logo">
+        </div>
+
+        <!-- Right side with login form -->
+        <div class="login-form">
+            <h2><i class="fas fa-sign-in-alt"></i> Terra Admin Login</h2>
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                    </div>
+                    <input type="text" name="username" class="form-control" placeholder="Username" required>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    </div>
+                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+
+            <a href="{% url 'signup' %}" class="forgot-password">Create Account?</a>
+        </div>
+    </div>
+
+</body>
+
+</html>

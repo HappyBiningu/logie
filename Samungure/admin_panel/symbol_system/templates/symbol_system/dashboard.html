@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/47101d2035.js" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .sidebar {
+            height: 100%;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #184474;
+            padding-top: 20px;
+            color: white;
+        }
+
+        .sidebar li {
+            list-style: none;
+            margin: 15px 0;
+            padding: 10px;
+        }
+
+        .sidebar a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            display: block;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .sidebar a i {
+            margin-right: 10px;
+        }
+
+        .sidebar a:hover {
+            background-color: #106ba3;
+        }
+
+        .sidebar a.active {
+            background-color: #0b5394;
+            font-weight: bold;
+        }
+
+        .dropdown-toggle::after {
+            content: ''; /* Remove default caret */
+        }
+        
+        .dropdown-menu {
+            background-color: #184474; /* Match sidebar */
+            border: none; /* Remove border for cleaner look */
+        }
+        
+        .dropdown-item {
+            color: #ffffff; /* Text color for dropdown items */
+            padding: 10px 20px; /* Consistent padding for dropdown items */
+        }
+        
+        .dropdown-item:hover {
+            background-color: #106ba3; /* Hover effect for dropdown items */
+        }
+
+        .condition-icon {
+            font-size: 1.5rem;
+        }
+        
+        .good-condition {
+            color: #28a745; /* Green for good */
+        }
+        
+        .medium-condition {
+            color: #ffc107; /* Yellow for near expiry */
+        }
+        
+        .bad-condition {
+            color: #dc3545; /* Red for expired */
+        }
+        
+
+        .content {
+            margin-left: 270px;
+            padding: 20px;
+        }
+
+        .dashboard-card, .summary-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background-color: #28a745;
+            color: white;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .summary-card h2 {
+            margin: 0;
+            font-size: 3rem;
+        }
+
+        .summary-card p {
+            margin: 10px 0 0;
+            font-size: 1.25rem;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 450px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            max-height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+  <!-- Sidebar Navigation -->
+<div class="sidebar">
+    <ul>
+        <li><a href="#" class="active"><i class="fas fa-chart-line"></i> Dashboard</a></li>
+        <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-plus-circle"></i> Add
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="{% url 'add_job' %}"><i class="fas fa-briefcase"></i> Add Job</a></li>
+                <li><a class="dropdown-item" href="{% url 'add_driver' %}"><i class="fas fa-user"></i> Add Driver</a></li>
+                <li><a class="dropdown-item" href="{% url 'add_vehicle' %}"><i class="fas fa-truck"></i> Add Vehicle</a></li>
+                <li><a class="dropdown-item" href="{% url 'add_parcel' %}"><i class="fas fa-box"></i> Add Parcel</a></li>
+            </ul>
+        </li>
+        <li><a href="{% url 'vehicle_list' %}"><i class="fas fa-tools"></i> Vehicle Maintenance</a></li>
+        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+    </ul>
+</div>
+
+<!-- Include Bootstrap JS and jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <!-- Main Content -->
+    <div class="content">
+        <!-- Summary Cards -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <h2>{{ total_jobs }}</h2>
+                    <p>Total Jobs</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <h2>{{ active_drivers }}</h2>
+                    <p>Active Drivers</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="summary-card">
+                    <h2>{{ parcels_delivered }}</h2>
+                    <p>Parcels Delivered</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <!-- Job Status Chart -->
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-chart-pie"></i> Job Status Overview</h2>
+                    <div class="chart-container">
+                        <canvas id="jobStatusChart" width="280" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Parcels Delivered Chart -->
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-box"></i> Parcels Delivered</h2>
+                    <div class="chart-container">
+                        <p>{{ parcels_delivered }} Parcels Delivered</p>
+                        <canvas id="parcelsDeliveredChart" width="280" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number of Vehicles Chart -->
+            <div class="col-md-4">
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-truck"></i> Number of Vehicles</h2>
+                    <div class="chart-container">
+                        <p>Total Vehicles: {{ total_vehicles }}</p>
+                        <canvas id="vehiclesChart" width="280" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Vehicles with Expiring Licenses Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>Vehicles Services</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Licence Plate</th>
+                    <th>Licence Expiry</th>
+                    <th>Last Maintenance</th>
+                    <th>Condition</th> <!-- New column for Condition -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for vehicle in vehicles_license_expiring %}
+                <tr>
+                    <td>{{ vehicle.license_plate }}</td>
+                    <td>{{ vehicle.license_expiry_date }}</td>
+                    <td>{{ vehicle.last_maintenance_date }}</td>
+                    <td>
+                        <!-- Display condition icon based on status -->
+                        <i class="fas fa-circle condition-icon 
+                            {% if vehicle.is_license_expired %}
+                                bad-condition
+                            {% elif vehicle.is_license_near_expiry %}
+                                medium-condition
+                            {% else %}
+                                good-condition
+                            {% endif %}
+                        "></i>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-muted">
+                    <td colspan="4">No vehicles with expiring licenses.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+     
+<!-- Vehicles Due for Maintenance Section -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h3>Vehicles Due for Maintenance</h3>
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for vehicle in vehicles_due_for_maintenance %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <strong>{{ vehicle.license_plate }}</strong>
+                <span class="text-muted">(Last Maintenance: {{ vehicle.last_maintenance_date }})</span>
+            </div>
+            <!-- Condition Icon based on maintenance status -->
+            <div>
+                <i class="fas fa-circle condition-icon 
+                    {% if vehicle.is_maintenance_overdue %}
+                        bad-condition
+                    {% elif vehicle.is_maintenance_due_soon %}
+                        medium-condition
+                    {% else %}
+                        good-condition
+                    {% endif %}
+                "></i>
+            </div>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">No vehicles due for maintenance.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+
+        <!-- Pending Parcels -->
+        <div class="dashboard-card">
+            <h2><i class="fas fa-box"></i> Pending Parcels</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tracking Number</th>
+                            <th>Destination</th>
+                            <th>Weight</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pending_parcels %}
+                        {% for parcel in pending_parcels %}
+                        <tr>
+                            <td>{{ parcel.tracking_number }}</td>
+                            <td>{{ parcel.destination }}</td>
+                            <td>{{ parcel.weight }}</td>
+                            <td>{{ parcel.customer.name }}</td>
+                            <td>{{ parcel.status }}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm mark-delivered" data-parcel-id="{{ parcel.id }}">Mark as Delivered</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No pending parcels available.</td>
+                </tr>
+            {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jobs List -->
+        <div class="dashboard-card">
+            <h2><i class="fas fa-briefcase"></i> Jobs List</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Description</th>
+                            <th>Driver</th>
+                            <th>Vehicle</th>
+                            <th>Date Posted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if jobs %}
+                            {% for job in jobs %}
+                            <tr>
+                                <td>{{ job.title }}</td>
+                                <td>{{ job.description }}</td>
+                                <td>{{ job.assigned_to }}</td>
+                                <td>{{ job.vehicle }}</td>
+                                <td>{{ job.date_posted }}</td>
+                                <td>
+                                    <a href="{% url 'edit_job' job.id %}" class="btn btn-primary btn-sm">Edit</a>
+                                    <a href="{% url 'delete_job' job.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this job?')">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No jobs available.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var jobStatusCtx = document.getElementById('jobStatusChart').getContext('2d');
+        var jobStatusChart = new Chart(jobStatusCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Pending', 'In Progress', 'Completed'],
+                datasets: [{
+                    label: 'Job Status',
+                    data: {{ job_status_data|safe }},
+                    backgroundColor: ['#ffc107', '#007bff', '#28a745']
+                }]
+            }
+        });
+
+        var parcelsDeliveredCtx = document.getElementById('parcelsDeliveredChart').getContext('2d');
+        var parcelsDeliveredChart = new Chart(parcelsDeliveredCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Delivered'],
+                datasets: [{
+                    data: [{{ parcels_delivered }}],
+                    backgroundColor: ['#28a745']
+                }]
+            }
+        });
+
+        var vehiclesCtx = document.getElementById('vehiclesChart').getContext('2d');
+        var vehiclesChart = new Chart(vehiclesCtx, {
+            type: 'line',
+            data: {
+                labels: {{ vehicle_labels|safe }},
+                datasets: [{
+                    label: 'Number of Vehicles',
+                    data: {{ vehicle_counts|safe }},
+                    backgroundColor: '#17a2b8'
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        document.querySelectorAll('.mark-delivered').forEach(button => {
+            button.addEventListener('click', function() {
+                var parcelId = this.getAttribute('data-parcel-id');
+                fetch(`/mark-delivered/${parcelId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.closest('tr').remove();
+                        alert('Parcel marked as delivered!');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+        });
+    </script>
+
+</body>
+
+</html>

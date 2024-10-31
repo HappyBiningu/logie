@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Job</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .content {
+            padding: 40px;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .dashboard-card h2 {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: #184474;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #184474;
+            box-shadow: 0 0 8px rgba(24, 68, 116, 0.3);
+        }
+
+        .btn-primary {
+            background-color: #184474;
+            border-color: #184474;
+            border-radius: 5px;
+            padding: 10px 20px;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #163a62;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9rem;
+        }
+
+        .form-group i {
+            margin-right: 8px;
+            color: #184474;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="content">
+        <div class="dashboard-card">
+            <h2><i class="fas fa-edit"></i> Edit Job</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">
+                            <i class="{% if field.name == 'title' %}fas fa-briefcase{% elif field.name == 'description' %}fas fa-align-left{% elif field.name == 'assigned_to' %}fas fa-user{% elif field.name == 'vehicle' %}fas fa-truck{% elif field.name == 'status' %}fas fa-tasks{% endif %}"></i>
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="error">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Job</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

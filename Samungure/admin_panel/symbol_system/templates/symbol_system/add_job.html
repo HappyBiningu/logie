@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Job</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .content {
+            padding: 40px;
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .dashboard-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-card h2 {
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            color: #184474;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group i {
+            margin-right: 8px;
+            color: #184474;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #184474;
+            box-shadow: 0 0 8px rgba(24, 68, 116, 0.5);
+        }
+
+        .btn-primary {
+            background-color: #184474;
+            border-color: #184474;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #163a62;
+            border-color: #163a62;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-control.error {
+            border-color: #dc3545;
+        }
+
+        .form-text.text-danger {
+            color: #dc3545;
+        }
+
+        select.form-control {
+            height: calc(2.25rem + 2px);
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        select.form-control:focus {
+            border-color: #184474;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="content">
+        <div class="dashboard-card">
+            <h2><i class="fas fa-briefcase"></i> Add New Job</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+                
+                <div class="form-group">
+                    <label for="{{ form.title.id_for_label }}"><i class="fas fa-heading"></i> Title</label>
+                    {{ form.title }}
+                    {{ form.title.errors }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}"><i class="fas fa-align-left"></i> Description</label>
+                    {{ form.description }}
+                    {{ form.description.errors }}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.assigned_to.id_for_label }}"><i class="fas fa-user"></i> Driver</label>
+                    <select class="form-control" id="{{ form.assigned_to.id_for_label }}" name="assigned_to">
+                        <option value="">Select a Driver</option>
+                        {% for driver in drivers %}
+                            <option value="{{ driver.id }}">{{ driver.name }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ form.assigned_to.errors }}
+                </div>
+            
+                <div class="form-group">
+                    <label for="{{ form.vehicle.id_for_label }}"><i class="fas fa-car"></i> Vehicle</label>
+                    <select class="form-control" id="{{ form.vehicle.id_for_label }}" name="vehicle">
+                        <option value="">Select a Vehicle</option>
+                        {% for vehicle in vehicles %}
+                            <option value="{{ vehicle.id }}">{{ vehicle.license_plate }}</option>
+                        {% endfor %}
+                    </select>
+                    {{ form.vehicle.errors }}
+                </div>
+            
+                <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Job</button>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

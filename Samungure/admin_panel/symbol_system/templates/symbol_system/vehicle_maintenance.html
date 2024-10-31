@@ -1,0 +1,15 @@
+<div class="container mt-4">
+    <h2>Update Maintenance and License Expiry for {{ vehicle.license_plate }}</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.license_expiry_date.label_tag }} 
+            {{ form.license_expiry_date }}
+        </div>
+        <div class="mb-3">
+            {{ form.last_maintenance_date.label_tag }}
+            {{ form.last_maintenance_date }}
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
